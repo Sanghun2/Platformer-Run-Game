@@ -74,4 +74,49 @@ public class PlayerMove : MonoBehaviour
             }
         }
     }
+
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.tag == "Enemy")
+        {
+            if (rigid.velocity.y < 0 && transform.position.y > collision.transform.position.y)
+            {
+                OnAttack(collision.transform);
+            }
+            else
+            {
+                OnDamaged(collision.transform.position);
+            }
+        }
+    }
+
+    void OnAttack(Transform enemy)
+    {
+        //point
+        rigid.AddForce(Vector2.up*10, ForceMode2D.Impulse);
+        //enemy die
+        EnemyMove enemyMove = enemy.GetComponent<EnemyMove>();
+        enemyMove.OnDamaged();
+    }
+
+    void OnDamaged(Vector2 targetPos)
+    {
+        gameObject.layer = 11;
+
+        spriteRenderer.color = new Color(1,1,1,0.4f);
+
+        //reaction force
+        rigid.velocity = Vector2.zero;
+        int dirc = transform.position.x - targetPos.x > 0 ? 1 : -1;
+        rigid.AddForce(new Vector2(dirc, 1)*7, ForceMode2D.Impulse);
+
+        anim.SetTrigger("damaged");
+        Invoke("OffDamaged", 3f);
+    }
+
+    void OffDamaged()
+    {
+        gameObject.layer = 10;
+        spriteRenderer.color = new Color(1,1,1,1);
+    }
 }

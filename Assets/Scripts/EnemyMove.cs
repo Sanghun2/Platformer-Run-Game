@@ -7,6 +7,7 @@ public class EnemyMove : MonoBehaviour
     Rigidbody2D rigid;
     public int nextMove;
     SpriteRenderer spriteRenderer;
+    BoxCollider2D boxCollider;
     Animator anim;
 
     void Awake()
@@ -14,6 +15,7 @@ public class EnemyMove : MonoBehaviour
         rigid = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+        boxCollider = GetComponent<BoxCollider2D>();
 
         Think();
     }
@@ -21,7 +23,10 @@ public class EnemyMove : MonoBehaviour
     void FixedUpdate()
     {
         //move
-        rigid.velocity = Vector2.right * nextMove;
+        if (!boxCollider.enabled)
+        {
+            rigid.velocity = Vector2.right * nextMove;
+        }
 
         //platform check
         Vector2 frontVec = new Vector2(rigid.position.x + nextMove*0.5f, rigid.position.y);
@@ -48,5 +53,19 @@ public class EnemyMove : MonoBehaviour
 
         float nextThinkTime = Random.Range(2f, 5f);
         Invoke("Think", nextThinkTime);
+    }
+
+    public void OnDamaged()
+    {
+        spriteRenderer.color = new Color(1,1,1,0.4f);
+        spriteRenderer.flipY = true;
+        boxCollider.enabled = false;
+        rigid.AddForce(Vector2.up*5, ForceMode2D.Impulse);
+        Invoke("DeActive", 5);
+    }
+
+    void DeActive()
+    {
+        gameObject.SetActive(false);
     }
 }
