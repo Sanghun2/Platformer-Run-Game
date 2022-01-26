@@ -9,6 +9,9 @@ public class PlayerMove : MonoBehaviour
     Rigidbody2D rigid;
     SpriteRenderer spriteRenderer;
     Animator anim;
+    bool isDamaged;
+
+    public GameManager gameManager;
 
     void Awake()
     {
@@ -81,6 +84,7 @@ public class PlayerMove : MonoBehaviour
         {
             if (rigid.velocity.y < 0 && transform.position.y > collision.transform.position.y)
             {
+                gameManager.stagePoint += 100;
                 OnAttack(collision.transform);
             }
             else
@@ -101,9 +105,13 @@ public class PlayerMove : MonoBehaviour
 
     void OnDamaged(Vector2 targetPos)
     {
+        if (isDamaged) return;
+         
+        isDamaged = true;
         gameObject.layer = 11;
 
         spriteRenderer.color = new Color(1,1,1,0.4f);
+        gameManager.HealthDown();
 
         //reaction force
         rigid.velocity = Vector2.zero;
@@ -118,5 +126,37 @@ public class PlayerMove : MonoBehaviour
     {
         gameObject.layer = 10;
         spriteRenderer.color = new Color(1,1,1,1);
+        isDamaged = false;
+    }
+
+    public void OnDie()
+    {
+        spriteRenderer.color = new Color(1, 1, 1, 0.4f);
+        rigid.velocity = Vector2.zero;
+    }
+
+    public void VelocityZero()
+    {
+        rigid.velocity = Vector2.zero;
+    }
+
+    void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.tag == "Item")
+        {
+            bool isBronze = collision.gameObject.name.Contains("Bronze");
+            bool isSilver = collision.gameObject.name.Contains("Silver");
+            bool isGold = collision.gameObject.name.Contains("Gold");
+
+            if (isBronze) gameManager.stagePoint += 50;
+            else if (isSilver) gameManager.stagePoint += 100;
+            else if (isGold) gameManager.stagePoint += 300;
+
+            collision.gameObject.SetActive(false);
+        }
+        else if (collision.gameObject.tag == "Finish")
+        {
+            gameManager.NextStage();
+        }
     }
 }

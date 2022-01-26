@@ -25,7 +25,7 @@ public class EnemyMove : MonoBehaviour
         //move
         if (!boxCollider.enabled)
         {
-            rigid.velocity = Vector2.right * nextMove;
+            rigid.velocity = new Vector2(nextMove, rigid.velocity.y);
         }
 
         //platform check
@@ -59,8 +59,8 @@ public class EnemyMove : MonoBehaviour
     {
         spriteRenderer.color = new Color(1,1,1,0.4f);
         spriteRenderer.flipY = true;
-        boxCollider.enabled = false;
         rigid.AddForce(Vector2.up*5, ForceMode2D.Impulse);
+        boxCollider.enabled = false;
         Invoke("DeActive", 5);
     }
 
